@@ -43,6 +43,10 @@ profile. This started with version 0.26.0.
 
 - Fix crash due to edge case with asterisk-prefixed comments (#2674, @Julow)
 
+
+- Fix crash when formatting `mld` files that cannot be lexed as ocaml (e.g.
+  containing LaTeX or C code) (#2684, @emillon)
+
 - \* Fix double parens around module constraint in functor application :
   `module M = F ((A : T))` becomes `module M = F (A : T)`. (#2678, @EmileTrotignon)
 
@@ -70,6 +74,8 @@ profile. This started with version 0.26.0.
 - \* The formatting of`let a = b in fun ...` is now consistent with other
   contexts like `a ; fun ...`. A check for the syntax `let a = fun ... in ...`
   was made more precise. (#2705, @EmileTrotignon)
+
+- Fix a crash on `type 'a t = A : 'a. {a: 'a} -> 'a t`. (#2710, @EmileTrotignon)
 
 ### Changed
 
@@ -103,6 +109,22 @@ profile. This started with version 0.26.0.
   print_endline "foo" ;;
   let a = 3
   ```
+
+- \* Infix apply docking behaviour from --ocp-indent-compat is promoted to
+ everyone. The most common effect is that `|> map (fun` is now indented from
+ `|>` and not from `map`:
+  ```ocaml
+  (* before *)
+  v
+  |>>>>>> map (fun x ->
+              x )
+  (* after *)
+  v
+  |>>>>>> map (fun x ->
+      x )
+  ```
+  `@@ match` can now also be on one line.
+  (#2694, @EmileTrotignon)
 
 ## 0.27.0
 
