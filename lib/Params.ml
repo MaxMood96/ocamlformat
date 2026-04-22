@@ -959,7 +959,15 @@ let get_if_then_else (c : Conf.t) ~cmts_before_opt ~pro ~first ~last
             | _ -> 0 )
       ; cond= cond ()
       ; box_keyword_and_expr= Fn.id
-      ; branch_pro= branch_pro ~begin_end_offset:0 ()
+      ; branch_pro=
+          ( if
+              (not has_beginend) && (not has_cmts_after_kw)
+              && not (Location.is_single_line expr_loc c.fmt_opts.margin.v)
+            then
+              match cmts_before_opt xbch.ast.pexp_loc with
+              | Some cmts -> break 1000 2 $ cmts
+              | None -> branch_pro ~begin_end_offset:0 ()
+            else branch_pro ~begin_end_offset:0 () )
       ; wrap_parens=
           wrap_parens
             ~wrap_breaks:
