@@ -35,7 +35,8 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
       - name: Opam dependencies
-        run: opam install --deps-only -t .
+        run: |
+          opam install -y --deps-only -t ./ocamlformat-lib.opam ./ocamlformat.opam ./ocamlformat-rpc-lib.opam
 
       - name: Format
         run: opam exec -- dune fmt

@@ -11,12 +11,14 @@
 
 let project_root_witness = [".git"; ".hg"; "dune-project"]
 
+let file_exists p = Stdlib.Sys.file_exists (Fpath.to_string p)
+
 let is_project_root ~root dir =
   match root with
   | Some root -> Fpath.equal dir root
   | None ->
       List.exists project_root_witness ~f:(fun name ->
-          Fpath.(exists (dir / name)) )
+          file_exists Fpath.(dir / name) )
 
 let dot_ocp_indent = ".ocp-indent"
 
@@ -29,7 +31,9 @@ let dot_ocamlformat_enable = ".ocamlformat-enable"
 type configuration_file = Ocamlformat of Fpath.t | Ocp_indent of Fpath.t
 
 let root_ocamlformat_file ~root =
-  let root = Option.value root ~default:(Fpath.cwd ()) in
+  let root =
+    match root with Some p -> p | None -> Fpath.v (Stdlib.Sys.getcwd ())
+  in
   Fpath.(root / dot_ocamlformat)
 
 let xdg_config () =
@@ -44,7 +48,7 @@ let xdg_config () =
   match xdg_config_home with
   | Some xdg_config_home ->
       let filename = Fpath.(xdg_config_home / "ocamlformat") in
-      if Fpath.exists filename then Some filename else None
+      if file_exists filename then Some filename else None
   | None -> None
 
 type t =
@@ -69,24 +73,24 @@ let make ~enable_outside_detected_project ~disable_conf_files
           { fs with
             ignore_files=
               (let filename = Fpath.(dir / dot_ocamlformat_ignore) in
-               if Fpath.exists filename then filename :: fs.ignore_files
+               if file_exists filename then filename :: fs.ignore_files
                else fs.ignore_files )
           ; enable_files=
               (let filename = Fpath.(dir / dot_ocamlformat_enable) in
-               if Fpath.exists filename then filename :: fs.enable_files
+               if file_exists filename then filename :: fs.enable_files
                else fs.enable_files )
           ; configuration_files=
               ( if disable_conf_files then []
                 else
                   let f_1 = Fpath.(dir / dot_ocamlformat) in
                   let files =
-                    if Fpath.exists f_1 then
+                    if file_exists f_1 then
                       Ocamlformat f_1 :: fs.configuration_files
                     else fs.configuration_files
                   in
                   if ocp_indent_config then
                     let f_2 = Fpath.(dir / dot_ocp_indent) in
-                    if Fpath.exists f_2 then Ocp_indent f_2 :: files
+                    if file_exists f_2 then Ocp_indent f_2 :: files
                     else files
                   else files ) }
         in

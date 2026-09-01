@@ -1,7 +1,7 @@
 The user's global configuration should be used when [--enable-outside-detected-project] is passed.
 
   $ mkdir -p root xdg
-  $ export XDG_CONFIG_HOME=$PWD/xdg
+  $ export XDG_CONFIG_HOME=../xdg
   $ echo 'break-cases = vertical' > xdg/ocamlformat
 
   $ cd root
